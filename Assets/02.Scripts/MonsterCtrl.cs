@@ -13,7 +13,7 @@ public class MonsterCtrl : MonoBehaviour {
     private NavMeshAgent nvAgent;
     private Animator animator;
 
-    public float traceDist = 10.0f;
+    public float traceDist = 200.0f;
     public float attackDist = 2.0f;
 
     private bool isDie = false;
@@ -26,23 +26,21 @@ public class MonsterCtrl : MonoBehaviour {
     private GameUI gameUI;
     
 	// Use this for initialization
-	void Start () {
+	void Awake () {
         monsterTr = this.gameObject.GetComponent<Transform>();
         playerTr = GameObject.FindWithTag("Player").GetComponent<Transform>();
         nvAgent = this.gameObject.GetComponent<NavMeshAgent>();
         animator = this.gameObject.GetComponent<Animator>();
         gameUI = GameObject.Find("GameUI").GetComponent<GameUI>();
-
-        // nvAgent.destination = playerTr.position;
-
-        StartCoroutine(this.CheckMonsterState());
-
-        StartCoroutine(this.MonsterAction());
     }
 
     void OnEnable()
     {
         PlayerCtrl.OnPlayerDie += this.OnPlayerDie;
+
+        StartCoroutine(this.CheckMonsterState());
+
+        StartCoroutine(this.MonsterAction());
     }
 
     void OnDisable()
@@ -122,6 +120,8 @@ public class MonsterCtrl : MonoBehaviour {
 
     void MonsterDie()
     {
+        gameObject.tag = "Untagged";
+
         StopAllCoroutines();
 
         isDie = true;
@@ -136,7 +136,29 @@ public class MonsterCtrl : MonoBehaviour {
         }
 
         gameUI.DispScore(50);
+
+        StartCoroutine(this.PushObjectPool());
     }
+
+    IEnumerator PushObjectPool()
+    {
+        yield return new WaitForSeconds(3.0f);
+
+        isDie = false;
+        hp = 100;
+        gameObject.tag = "MONSTER";
+        monsterState = MonsterState.idle;
+
+        gameObject.GetComponentInChildren<CapsuleCollider>().enabled = true;
+
+        foreach(Collider coll in gameObject.GetComponentsInChildren<SphereCollider>())
+        {
+            coll.enabled = true;
+        }
+
+        gameObject.SetActive(false);
+    }
+
     void CreateBloodEffect(Vector3 pos)
     {
         GameObject blood1 = (GameObject)Instantiate(bloodEffect, pos, Quaternion.identity);

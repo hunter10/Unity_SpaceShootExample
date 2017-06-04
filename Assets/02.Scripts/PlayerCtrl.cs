@@ -34,6 +34,8 @@ public class PlayerCtrl : MonoBehaviour {
     public delegate void PlayerDieHandler();
     public static event PlayerDieHandler OnPlayerDie;
 
+    //private GameMgr gameMgr;
+
 	// Use this for initialization
 	void Start () {
 
@@ -41,6 +43,7 @@ public class PlayerCtrl : MonoBehaviour {
 
         tr = GetComponent<Transform>();
 
+        //gameMgr = GameObject.Find("GameManager").GetComponent<GameMgr>();
         _animation = GetComponentInChildren<Animation>();
 
         _animation.clip = anim.idle;
@@ -114,6 +117,9 @@ public class PlayerCtrl : MonoBehaviour {
 
         // 델리게이트 적용 
         OnPlayerDie();
+
+        //gameMgr.isGameOver = true;
+        GameMgr.instance.isGameOver = true;
     }
 
 }

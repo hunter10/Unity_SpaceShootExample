@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 [System.Serializable]
 public class Anim
@@ -25,21 +26,25 @@ public class PlayerCtrl : MonoBehaviour {
     public Anim anim;
     public Animation _animation;
 
+    public int hp = 100;
+
+    private int initHp;
+    public Image imgHpBar;
+
+    public delegate void PlayerDieHandler();
+    public static event PlayerDieHandler OnPlayerDie;
+
 	// Use this for initialization
 	void Start () {
+
+        initHp = hp;
+
         tr = GetComponent<Transform>();
 
         _animation = GetComponentInChildren<Animation>();
 
         _animation.clip = anim.idle;
         _animation.Play();
-
-        //float vec1 = Vector3.Magnitude(Vector3.forward);
-        //float vec2 = Vector3.Magnitude(Vector3.forward + Vector3.right);
-        //float vec3 = Vector3.Magnitude((Vector3.forward + Vector3.right).normalized);
-        //Debug.Log(vec1);
-        //Debug.Log(vec2);
-        //Debug.Log(vec3);
     }
 	
 	// Update is called once per frame
@@ -77,4 +82,38 @@ public class PlayerCtrl : MonoBehaviour {
             _animation.CrossFade(anim.idle.name, 0.3f);
         }
     }
+
+    void OnTriggerEnter(Collider coll)
+    {
+        if(coll.gameObject.tag == "PUNCH")
+        {
+            hp -= 10;
+            //Debug.Log("Player HP = " + hp.ToString());
+            imgHpBar.fillAmount = (float)hp / (float)initHp;
+
+            if(hp <= 0)
+            {
+                PlayerDie();
+            }
+        }
+    }
+
+    void PlayerDie()
+    {
+        //Debug.Log("Player Die !!");
+
+        // Monster Tag를 가진 모든 게임오브젝트를 찾아옴
+        GameObject[] monsters = GameObject.FindGameObjectsWithTag("MONSTER");
+
+        // 순차 적용 
+        //Debug.Log("monsters : " + monsters.Length);
+        //foreach(GameObject monster in monsters)
+        //{
+        //    monster.SendMessage("OnPlayerDie", SendMessageOptions.DontRequireReceiver);
+        //}
+
+        // 델리게이트 적용 
+        OnPlayerDie();
+    }
+
 }

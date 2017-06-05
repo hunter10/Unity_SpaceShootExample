@@ -187,4 +187,19 @@ public class MonsterCtrl : MonoBehaviour {
         nvAgent.Stop();
         animator.SetTrigger("IsPlayerDie");
     }
+
+    void OnDamage(object[] _params)
+    {
+        Debug.Log(string.Format("Hit ray {0} : {1}", _params[0], _params[1]));
+
+        CreateBloodEffect((Vector3)_params[0]);
+
+        hp -= (int)_params[1];
+        if(hp <= 0)
+        {
+            MonsterDie();
+        }
+
+        animator.SetTrigger("IsHit");
+    }
 }
